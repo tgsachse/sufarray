@@ -55,6 +55,10 @@ void test_suffix_array(void) {
     print_suffix_array(array);
     print_suffixes(array);
    
+    sort_suffixes_alphabetically(array);
+    print_suffix_array(array);
+    print_suffixes(array);
+
     destroy_suffix_array(array);
 }
 

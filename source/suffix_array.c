@@ -75,7 +75,11 @@ suffix_array* new_suffix_array(char* string) {
 
 // Use radix sort to sort the suffixes in a suffix array alphabetically.
 int sort_suffixes_alphabetically(suffix_array* array) {
-    int index;
+    int offset;
+    int queue_index;
+    int char_target;
+    int suffix_index;
+    integer_queue* unsorted_queue;
     integer_queue* queues[ALPHABET_SIZE];
 
     // Ensure that the suffix array exists.
@@ -83,19 +87,54 @@ int sort_suffixes_alphabetically(suffix_array* array) {
         return OPERATION_FAILURE;
     }
 
+    if ((unsorted_queue = new_integer_queue()) == NULL) {
+        return OPERATION_FAILURE;
+    }
+
     // Create ALPHABET_SIZE integer queues in an array for radix sort!
-    for (index = 0; index < ALPHABET_SIZE; index++) {
+    for (queue_index = 0; queue_index < ALPHABET_SIZE; queue_index++) {
 
         // If a call to create a new queue fails, free all
         // previously created queues and fail.
-        if ((queues[index] = new_integer_queue()) == NULL) {
+        if ((queues[queue_index] = new_integer_queue()) == NULL) {
             destroy_integer_queues(queues, ALPHABET_SIZE);
 
             return OPERATION_FAILURE;
         }
     }
 
+    offset = array->string_length - 1;
+    while (offset >= 0) {
+        for (suffix_index = 0; suffix_index < array->string_length; suffix_index++) {
+            char_target = array->suffixes[suffix_index] + offset;
+            if (char_target >= array->string_length) {
+                enqueue(unsorted_queue, array->suffixes[suffix_index]);
+            }
+            else {
+                enqueue(
+                    queues[index_of_character(array->string[char_target])],
+                    array->suffixes[suffix_index]
+                );
+            }
+        }
 
+        suffix_index = 0;
+        while (!is_empty(unsorted_queue)) {
+            array->suffixes[suffix_index] = dequeue(unsorted_queue);
+            suffix_index++;
+        }
+
+        for (queue_index = 0; queue_index < ALPHABET_SIZE; queue_index++) {
+            while(!is_empty(queues[queue_index])) {
+                array->suffixes[suffix_index] = dequeue(queues[queue_index]);
+                suffix_index++;
+            }
+        }
+
+        offset--;
+    }
+
+    destroy_integer_queue(unsorted_queue);
     destroy_integer_queues(queues, ALPHABET_SIZE);
 }
 
@@ -113,7 +152,11 @@ void print_suffix_array(suffix_array* array) {
     printf("String length: %d\n", array->string_length);
     printf("Suffixes: ");
     for (index = 0; index < array->string_length; index++) {
-        printf("%d%s", index, (index == array->string_length - 1) ? "\n" : " ");
+        printf(
+            "%d%s",
+            array->suffixes[index],
+            (index == array->string_length - 1) ? "\n" : " "
+        );
     }
 }
 
@@ -143,4 +186,3 @@ void destroy_suffix_array(suffix_array* array) {
     free(array->suffixes);
     free(array);
 }
-
