@@ -32,17 +32,17 @@ int is_empty(integer_queue* queue) {
 }
 
 // Add a new integer to the queue.
-int enqueue(integer_queue* queue, int data) {
+flag enqueue(integer_queue* queue, int data) {
 
     // Can't enqueue into a non-existent queue.
     if (queue == NULL) {
-        return OPERATION_FAILURE;
+        return FLAG_FAILURE;
     }
 
     // If the queue is empty, insert a new node at the head of the queue.
     if (is_empty(queue)) {
         if ((queue->head = new_integer_queue_node(data)) == NULL) {
-            return OPERATION_FAILURE;
+            return FLAG_FAILURE;
         }
 
         queue->tail = queue->head;
@@ -51,13 +51,13 @@ int enqueue(integer_queue* queue, int data) {
     // Otherwise, insert a new node at the back of the queue.
     else {
         if ((queue->tail->next = new_integer_queue_node(data)) == NULL) {
-            return OPERATION_FAILURE;
+            return FLAG_FAILURE;
         }
 
         queue->tail = queue->tail->next;
     }
 
-    return OPERATION_SUCCESS;
+    return FLAG_SUCCESS;
 }
 
 // Retrieve the data at the front of the queue.
@@ -68,7 +68,7 @@ int dequeue(integer_queue* queue) {
     // Can't dequeue from an empty queue! This will also trigger
     // if queue is NULL.
     if (is_empty(queue)) {
-        return OPERATION_FAILURE;
+        return FLAG_FAILURE;
     }
 
     // Save the dequeued node and advance the head pointer.

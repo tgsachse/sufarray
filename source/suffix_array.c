@@ -16,7 +16,7 @@ int index_of_character(char character) {
         return character - 'a';
     }
     else {
-        return OPERATION_FAILURE;
+        return FLAG_FAILURE;
     }
 }
 
@@ -26,6 +26,41 @@ int is_alphabetic(char character) {
         (character >= 'A' && character <= 'Z')
         || (character >= 'a' && character <= 'z')
     );
+}
+
+// Determine if a string contains a pattern.
+flag contains(char* string, char* pattern) {
+    int char_index;
+
+    // Handle base cases, where either or both array arguments are NULL.
+    if (string == NULL) {
+        return (pattern == NULL) ? FLAG_SUCCESS : FLAG_STRING_LOWER;
+    }
+    else if (pattern == NULL) {
+        return FLAG_PATTERN_LOWER;
+    }
+
+    // Compare all elements in both char arrays. If there is a mismatch,
+    // throw the appropriate flag.
+    char_index = 0;
+    while (string[char_index] != '\0' && pattern[char_index] != '\0') {
+        if (string[char_index] != pattern[char_index]) {
+            if (string[char_index] < pattern[char_index]) {
+                return FLAG_STRING_LOWER;
+            }
+            else {
+                return FLAG_PATTERN_LOWER;
+            }
+        }
+        else {
+            char_index++;
+        }
+    }
+
+    // At this point, every character has matched in the pattern and the string.
+    // If pattern is empty, return success! Otherwise string must be empty, so
+    // string has lower alphabetic precedence than pattern.
+    return (pattern[char_index] == '\0') ? FLAG_SUCCESS : FLAG_STRING_LOWER;
 }
 
 // Create a new suffix array and sort the suffixes.
@@ -82,7 +117,7 @@ suffix_array* new_suffix_array(char* string) {
     }
 
     // Sort the suffix positions in the suffix array alphabetically.
-    if (sort_suffixes_alphabetically(array) == OPERATION_FAILURE) {
+    if (sort_suffixes_alphabetically(array) == FLAG_FAILURE) {
         destroy_suffix_array(array);
 
         return NULL;
@@ -92,9 +127,9 @@ suffix_array* new_suffix_array(char* string) {
 }
 
 // Use radix sort to sort the suffixes in a suffix array alphabetically.
-int sort_suffixes_alphabetically(suffix_array* array) {
+flag sort_suffixes_alphabetically(suffix_array* array) {
     int offset;
-    int result;
+    flag result;
     int queue_index;
     int char_target;
     int suffix_index;
@@ -103,13 +138,13 @@ int sort_suffixes_alphabetically(suffix_array* array) {
 
     // Ensure that the suffix array exists.
     if (array == NULL) {
-        return OPERATION_FAILURE;
+        return FLAG_FAILURE;
     }
 
     // Create an unsorted queue for suffixes that do not have enough characters
     // to be sorted on any particular run of radix sort.
     if ((unsorted_queue = new_integer_queue()) == NULL) {
-        return OPERATION_FAILURE;
+        return FLAG_FAILURE;
     }
 
     // Create ALPHABET_SIZE integer queues in an array for radix sort.
@@ -121,7 +156,7 @@ int sort_suffixes_alphabetically(suffix_array* array) {
             destroy_integer_queues(queues, ALPHABET_SIZE);
             destroy_integer_queue(unsorted_queue);
 
-            return OPERATION_FAILURE;
+            return FLAG_FAILURE;
         }
     }
 
@@ -144,11 +179,11 @@ int sort_suffixes_alphabetically(suffix_array* array) {
                 // Attempt to enqueue into the unsorted queue. If enqueuing fails,
                 // destroy all the queues and return failure.
                 result = enqueue(unsorted_queue, array->suffixes[suffix_index]);
-                if (result == OPERATION_FAILURE) {
+                if (result == FLAG_FAILURE) {
                     destroy_integer_queues(queues, ALPHABET_SIZE);
                     destroy_integer_queue(unsorted_queue);
 
-                    return OPERATION_FAILURE;
+                    return FLAG_FAILURE;
                 }
             }
             else {
@@ -158,11 +193,11 @@ int sort_suffixes_alphabetically(suffix_array* array) {
                     queues[index_of_character(array->string[char_target])],
                     array->suffixes[suffix_index]
                 );
-                if (result == OPERATION_FAILURE) {
+                if (result == FLAG_FAILURE) {
                     destroy_integer_queues(queues, ALPHABET_SIZE);
                     destroy_integer_queue(unsorted_queue);
 
-                    return OPERATION_FAILURE;
+                    return FLAG_FAILURE;
                 }
             }
         }
@@ -191,6 +226,38 @@ int sort_suffixes_alphabetically(suffix_array* array) {
     // Clean up after yourself!
     destroy_integer_queue(unsorted_queue);
     destroy_integer_queues(queues, ALPHABET_SIZE);
+}
+
+// Perform a binary search on the suffix array to check for a pattern in the string.
+int search(suffix_array* array, char* pattern) {
+    int low;
+    int mid;
+    int high;
+    flag result;
+
+    if (array == NULL || pattern == NULL || pattern[0] == '\0') {
+        return FLAG_FAILURE;
+    }
+
+    // The classic binary search algorithm.
+    low = 0;
+    high = array->string_length - 1;
+    while (low <= high) {
+        mid = high - ((high - low) / 2);
+
+        result = contains(array->string + array->suffixes[mid], pattern);
+        if (result == FLAG_SUCCESS) {
+            return array->suffixes[mid];
+        }
+        else if (result == FLAG_STRING_LOWER) {
+            low = mid + 1;
+        }
+        else {
+            high = mid - 1;
+        }
+    }
+
+    return FLAG_FAILURE;
 }
 
 // Print the unsorted suffixes in a suffix array.
@@ -231,6 +298,72 @@ void print_sorted_suffixes(suffix_array* array) {
     for (suffix_index = 0; suffix_index < array->string_length; suffix_index++) {
         printf("%s\n", array->string + array->suffixes[suffix_index]);
     }
+}
+
+void print_highlighted_substring(suffix_array* array, int start_pos, int length) {
+    int inset;
+    int counter;
+
+    if (array == NULL) {
+        printf("Suffix array is NULL!\n");
+
+        return;
+    }
+
+    if (start_pos < 0 || start_pos >= array->string_length) {
+        printf("Start position for highlighted substring is out of bounds!\n");
+
+        return;
+    }
+    
+    if (length < 1 || length > array->string_length - start_pos) {
+        printf("Length for highlighted substring is out of bounds!\n");
+        
+        return;
+    }
+
+    inset = 0;
+    if (start_pos != 0) {
+        printf("...");
+        inset += 3;
+    }
+    for (counter = start_pos - PADDING; counter < start_pos; counter++) {
+        if (counter >= 0) {
+            printf("%c", array->string[counter]);
+            inset++;
+        }
+    }
+
+    for (counter = 0; counter < length; counter++) {
+        if (start_pos + counter < array->string_length) {
+            printf("%c", array->string[start_pos + counter]);
+        }
+    }
+
+    for (counter = start_pos + length; counter < start_pos + length + PADDING; counter++) {
+        if (counter < array->string_length) {
+            printf("%c", array->string[counter]);
+        }
+        else {
+            break;
+        }
+    }
+
+    if (counter != array->string_length) {
+        printf("...");
+    }
+    printf("\n");
+
+    while (inset > 0) {
+        printf(" ");
+        inset--;
+    }
+
+    for (counter = 0; counter < length; counter++) {
+        printf("^");
+    }
+
+    printf("\n");
 }
 
 // Destroy a suffix array.

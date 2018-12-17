@@ -56,6 +56,8 @@ char* read_file(char* file_name) {
 
 // Main entry point of the program.
 int main(int argument_count, char** arguments) {
+    int position;
+    int argument;
     char* string;
     suffix_array* array;
 
@@ -93,11 +95,26 @@ int main(int argument_count, char** arguments) {
         }
     }
 
+    // Print the unsorted and sorted suffixes.
     printf("Unsorted suffixes:\n");
     print_unsorted_suffixes(array);
     printf("\n");
     printf("Sorted suffixes:\n");
     print_sorted_suffixes(array);
+    printf("\n");
+
+    // Run a search for all of the rest of the arguments.
+    for (argument = 2; argument < argument_count; argument++) {
+        printf("Searching for '%s': ", arguments[argument]);
+        if ((position = search(array, arguments[argument])) == FLAG_FAILURE) {
+            printf("not found!\n");
+        }
+        else {
+            printf("found at position %d!\n", position);
+            print_highlighted_substring(array, position, strlen(arguments[argument]));
+            printf("\n");
+        }
+    }
 
     free(string);
     destroy_suffix_array(array);

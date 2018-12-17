@@ -4,9 +4,15 @@
 #include <stdlib.h>
 #include <limits.h>
 
+#define PADDING 10
 #define ALPHABET_SIZE 26
-#define OPERATION_FAILURE INT_MIN
-#define OPERATION_SUCCESS INT_MIN + 1
+
+typedef enum flag {
+    FLAG_FAILURE=INT_MIN,
+    FLAG_SUCCESS,
+    FLAG_STRING_LOWER,
+    FLAG_PATTERN_LOWER
+} flag;
 
 // A node in the integer queue linked list.
 typedef struct integer_queue_node {
@@ -31,7 +37,7 @@ typedef struct suffix_array {
 integer_queue* new_integer_queue(void);
 integer_queue_node* new_integer_queue_node(int);
 int is_empty(integer_queue*);
-int enqueue(integer_queue*, int);
+flag enqueue(integer_queue*, int);
 int dequeue(integer_queue*);
 void print_integer_queue(integer_queue*);
 void destroy_integer_queue(integer_queue*);
@@ -39,8 +45,11 @@ void destroy_integer_queues(integer_queue**, int);
 
 int index_of_character(char);
 int is_alphabetic(char);
+flag contains(char*, char*);
 suffix_array* new_suffix_array(char*);
-int sort_suffixes_alphabetically(suffix_array*);
+flag sort_suffixes_alphabetically(suffix_array*);
+int search(suffix_array*, char*);
 void print_unsorted_suffixes(suffix_array*);
 void print_sorted_suffixes(suffix_array*);
+void print_highlighted_substring(suffix_array*, int, int);
 void destroy_suffix_array(suffix_array*);
