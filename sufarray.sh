@@ -1,22 +1,22 @@
-# Operations script to make working with this repository easier.
+# Some functions that make this repository easier to work with.
 # Written by Tiger Sachse.
 
 PROGRAM_NAME="sufarray"
 
 # Build the program.
-build() {
+build_program() {
     gcc source/*.c -o $PROGRAM_NAME
 }
 
 # Run the program and clean up afterwards.
-run() {
+run_program() {
     build
     ./$PROGRAM_NAME "$@"
     rm -rf $PROGRAM_NAME
 }
 
 # Test the program with Valgrind.
-test_with_valgrind() {
+test_program() {
     build
     valgrind --leak-check=full ./$PROGRAM_NAME "$@"
     rm -rf $PROGRAM_NAME
@@ -25,14 +25,14 @@ test_with_valgrind() {
 # Entry point of the script.
 case $1 in
     "--build")
-        build
+        build_program
         ;;
 
     "--run")
-        run "$@"
+        run_program "$@"
         ;;
 
-    "--valgrind")
-        test_with_valgrind "$@"
+    "--test")
+        test_program "$@"
         ;;
 esac
