@@ -41,6 +41,6 @@ int index_of_character(char);
 int is_alphabetic(char);
 suffix_array* new_suffix_array(char*);
 int sort_suffixes_alphabetically(suffix_array*);
-void print_suffix_array(suffix_array*);
-void print_suffixes(suffix_array*);
+void print_unsorted_suffixes(suffix_array*);
+void print_sorted_suffixes(suffix_array*);
 void destroy_suffix_array(suffix_array*);
