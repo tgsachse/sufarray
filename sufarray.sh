@@ -10,14 +10,14 @@ build_program() {
 
 # Run the program and clean up afterwards.
 run_program() {
-    build
+    build_program
     ./$PROGRAM_NAME "$@"
     rm -rf $PROGRAM_NAME
 }
 
 # Test the program with Valgrind.
 test_program() {
-    build
+    build_program
     valgrind --leak-check=full ./$PROGRAM_NAME "$@"
     rm -rf $PROGRAM_NAME
 }
@@ -29,10 +29,10 @@ case $1 in
         ;;
 
     "--run")
-        run_program "$@"
+        run_program "${@:2}"
         ;;
 
     "--test")
-        test_program "$@"
+        test_program "${@:2}"
         ;;
 esac
