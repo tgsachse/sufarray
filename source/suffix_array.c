@@ -103,6 +103,7 @@ int sort_suffixes_alphabetically(suffix_array* array) {
         }
     }
 
+    // UNTESTED MESS
     offset = array->string_length - 1;
     while (offset >= 0) {
         for (suffix_index = 0; suffix_index < array->string_length; suffix_index++) {
