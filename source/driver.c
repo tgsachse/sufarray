@@ -61,7 +61,7 @@ int main(int argument_count, char** arguments) {
     char* string;
     suffix_array* array;
 
-    // Yell at the user if they are missing arguments.
+    // Yell at the user if she is missing arguments.
     if (argument_count < 2) {
         printf("First argument after --run must be a string or file.\n");
         printf("All arguments afterwards will be treated as search patterns.\n");
@@ -103,7 +103,7 @@ int main(int argument_count, char** arguments) {
     print_sorted_suffixes(array);
     printf("\n");
 
-    // Run a search for all of the rest of the arguments.
+    // Run searches using the rest of the arguments.
     for (argument = 2; argument < argument_count; argument++) {
         printf("Searching for '%s': ", arguments[argument]);
         if ((position = search(array, arguments[argument])) == FLAG_FAILURE) {
@@ -112,7 +112,6 @@ int main(int argument_count, char** arguments) {
         else {
             printf("found at position %d!\n", position);
             print_highlighted_substring(array, position, strlen(arguments[argument]));
-            printf("\n");
         }
     }
 

@@ -32,7 +32,6 @@ int is_alphabetic(char character) {
 flag contains(char* string, char* pattern) {
     int char_index;
 
-    // Handle base cases, where either or both array arguments are NULL.
     if (string == NULL) {
         return (pattern == NULL) ? FLAG_SUCCESS : FLAG_STRING_LOWER;
     }
@@ -58,24 +57,23 @@ flag contains(char* string, char* pattern) {
     }
 
     // At this point, every character has matched in the pattern and the string.
-    // If pattern is empty, return success! Otherwise string must be empty, so
-    // string has lower alphabetic precedence than pattern.
+    // If the pattern is finished, return success! Otherwise the string must be
+    // finished, so the string has lower alphabetic precedence than the pattern.
     return (pattern[char_index] == '\0') ? FLAG_SUCCESS : FLAG_STRING_LOWER;
 }
 
-// Create a new suffix array and sort the suffixes.
+// Create a new suffix array with alphabetically suffixes.
 suffix_array* new_suffix_array(char* string) {
     int characters;
     int suffix_index;
     suffix_array* array;
 
-    // If the string contains nothing, create nothing.
     if (string == NULL || string[0] == '\0') {
         return NULL;
     }
 
-    // Ensure that all characters are alphabetic and count the number of characters.
-    // No non-alphabetic characters are allowed in this implementation of suffix arrays.
+    // Ensure that all characters are alphabetic, and count the number of characters.
+    // No non-alphabetic characters are allowed in this implementation.
     characters = 0;
     while (string[characters] != '\0') {
         if (!is_alphabetic(string[characters])) {
@@ -108,7 +106,7 @@ suffix_array* new_suffix_array(char* string) {
 
     // Copy the string into the container struct. Also save the string length
     // and initialize all suffix positions in the suffix array to their respective
-    // start position in the string. These suffix positions are not alphabetically
+    // start positions in the string. These suffix positions are not alphabetically
     // sorted. That step is next!
     strcpy(array->string, string);
     array->string_length = characters;
@@ -136,7 +134,6 @@ flag sort_suffixes_alphabetically(suffix_array* array) {
     integer_queue* unsorted_queue;
     integer_queue* queues[ALPHABET_SIZE];
 
-    // Ensure that the suffix array exists.
     if (array == NULL) {
         return FLAG_FAILURE;
     }
@@ -175,9 +172,6 @@ flag sort_suffixes_alphabetically(suffix_array* array) {
         for (suffix_index = 0; suffix_index < array->string_length; suffix_index++) {
             char_target = array->suffixes[suffix_index] + offset;
             if (char_target >= array->string_length) {
-
-                // Attempt to enqueue into the unsorted queue. If enqueuing fails,
-                // destroy all the queues and return failure.
                 result = enqueue(unsorted_queue, array->suffixes[suffix_index]);
                 if (result == FLAG_FAILURE) {
                     destroy_integer_queues(queues, ALPHABET_SIZE);
@@ -187,8 +181,6 @@ flag sort_suffixes_alphabetically(suffix_array* array) {
                 }
             }
             else {
-                // Attempt to enqueue into the appropriate sorted queue. If
-                // enqueuing fails, destroy all the queues and return failure.
                 result = enqueue(
                     queues[index_of_character(array->string[char_target])],
                     array->suffixes[suffix_index]
@@ -264,7 +256,6 @@ int search(suffix_array* array, char* pattern) {
 void print_unsorted_suffixes(suffix_array* array) {
     int suffix_offset;
 
-    // Nothing to do!
     if (array == NULL) {
         printf("Suffix array is NULL!\n");
 
@@ -282,10 +273,6 @@ void print_unsorted_suffixes(suffix_array* array) {
 void print_sorted_suffixes(suffix_array* array) {
     int suffix_index;
 
-    // Nothing to do! It is safe to assume that if the array is not
-    // NULL then it will have a string of length >= 1. This is due to
-    // the new_suffix_array() function only executing with strings of
-    // length >= 1.
     if (array == NULL) {
         printf("Suffix array is NULL!\n");
 
@@ -300,6 +287,7 @@ void print_sorted_suffixes(suffix_array* array) {
     }
 }
 
+// Print a highlighted substring in the suffix array.
 void print_highlighted_substring(suffix_array* array, int start_pos, int length) {
     int inset;
     int counter;
@@ -310,23 +298,28 @@ void print_highlighted_substring(suffix_array* array, int start_pos, int length)
         return;
     }
 
+    // Ensure that the start position is valid.
     if (start_pos < 0 || start_pos >= array->string_length) {
         printf("Start position for highlighted substring is out of bounds!\n");
 
         return;
     }
     
+    // Ensure that the length is valid.
     if (length < 1 || length > array->string_length - start_pos) {
         printf("Length for highlighted substring is out of bounds!\n");
         
         return;
     }
 
+    // Print 3 dots if the beginning of the string won't be shown.
     inset = 0;
-    if (start_pos != 0) {
+    if (start_pos > PADDING) {
         printf("...");
         inset += 3;
     }
+
+    // Print a couple characters before the start of the substring.
     for (counter = start_pos - PADDING; counter < start_pos; counter++) {
         if (counter >= 0) {
             printf("%c", array->string[counter]);
@@ -334,12 +327,14 @@ void print_highlighted_substring(suffix_array* array, int start_pos, int length)
         }
     }
 
+    // Print the substring.
     for (counter = 0; counter < length; counter++) {
         if (start_pos + counter < array->string_length) {
             printf("%c", array->string[start_pos + counter]);
         }
     }
 
+    // Print a couple of characters after the end of the substring.
     for (counter = start_pos + length; counter < start_pos + length + PADDING; counter++) {
         if (counter < array->string_length) {
             printf("%c", array->string[counter]);
@@ -349,16 +344,19 @@ void print_highlighted_substring(suffix_array* array, int start_pos, int length)
         }
     }
 
+    // If the end of the string hasn't been reached, print 3 dots.
     if (counter != array->string_length) {
         printf("...");
     }
-    printf("\n");
 
+    // Print an invisible inset on the next line.
+    printf("\n");
     while (inset > 0) {
         printf(" ");
         inset--;
     }
 
+    // Print carats to highlight the substring.
     for (counter = 0; counter < length; counter++) {
         printf("^");
     }
@@ -369,7 +367,6 @@ void print_highlighted_substring(suffix_array* array, int start_pos, int length)
 // Destroy a suffix array.
 void destroy_suffix_array(suffix_array* array) {
 
-    // Nothing to do!
     if (array == NULL) {
         return;
     }

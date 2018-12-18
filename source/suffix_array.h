@@ -7,6 +7,7 @@
 #define PADDING 10
 #define ALPHABET_SIZE 26
 
+// Signal flags for functions.
 typedef enum flag {
     FLAG_FAILURE=INT_MIN,
     FLAG_SUCCESS,
@@ -33,7 +34,7 @@ typedef struct suffix_array {
     int string_length;
 } suffix_array;
 
-// Functional prototypes
+// Functional prototypes for integer queues.
 integer_queue* new_integer_queue(void);
 integer_queue_node* new_integer_queue_node(int);
 int is_empty(integer_queue*);
@@ -43,6 +44,7 @@ void print_integer_queue(integer_queue*);
 void destroy_integer_queue(integer_queue*);
 void destroy_integer_queues(integer_queue**, int);
 
+// Functional prototypes for suffix arrays.
 int index_of_character(char);
 int is_alphabetic(char);
 flag contains(char*, char*);

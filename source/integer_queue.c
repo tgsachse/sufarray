@@ -33,8 +33,6 @@ int is_empty(integer_queue* queue) {
 
 // Add a new integer to the queue.
 flag enqueue(integer_queue* queue, int data) {
-
-    // Can't enqueue into a non-existent queue.
     if (queue == NULL) {
         return FLAG_FAILURE;
     }
@@ -65,8 +63,6 @@ int dequeue(integer_queue* queue) {
     int dequeued_data;
     integer_queue_node* dequeued_node;
 
-    // Can't dequeue from an empty queue! This will also trigger
-    // if queue is NULL.
     if (is_empty(queue)) {
         return FLAG_FAILURE;
     }
@@ -115,7 +111,6 @@ void print_integer_queue(integer_queue* queue) {
 void destroy_integer_queue(integer_queue* queue) {
     integer_queue_node* next_node;
 
-    // Nothing to do!
     if (queue == NULL) {
         return;
     }
@@ -127,7 +122,6 @@ void destroy_integer_queue(integer_queue* queue) {
         queue->head = next_node;
     }
 
-    // Free the container struct too!
     free(queue);
 }
 
@@ -135,7 +129,6 @@ void destroy_integer_queue(integer_queue* queue) {
 void destroy_integer_queues(integer_queue** queues, int size) {
     int index;
 
-    // Nothing to do!
     if (queues == NULL) {
         return;
     }
